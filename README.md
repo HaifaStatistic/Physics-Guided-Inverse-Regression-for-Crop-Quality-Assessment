@@ -9,7 +9,7 @@ This repository contains the implementation and data for the paper "Physics-Guid
 - **plots/**: Directory for storing plots and visualizations generated during the analysis.
 - **scripts/**: Contains various utility scripts for data preprocessing, model training, and evaluation.
 - **README.md**: This file.
-- **requirements.txt**: List of dependencies required to run the code.
+- **environment.yml**: List of dependencies required to run the code.
 - **run_model_selection.py**: Script to run the model selection process.
 
 ## Abstract
@@ -54,11 +54,30 @@ A comprehensive simulation study was conducted to evaluate the robustness of the
 ## Conclusion
 This research marks a significant step towards more advanced, precise, and reliable crop quality assessment systems. The PGNN approach integrates physical laws into neural network models, enhancing the interpretability and accuracy of predictions. Future work will explore extending this framework to other types of produce and incorporating additional data types for a more comprehensive assessment.
 
-## Requirements
-To install the necessary dependencies, run:
-```sh
-pip install -r requirements.txt
-```
+## Setup Instructions
+
+### Conda Environment
+
+To set up the environment using Anaconda/Conda, follow these steps:
+
+1. **Install Anaconda/Miniconda**: If you haven't already installed Anaconda or Miniconda, you can download and install it from [Anaconda](https://www.anaconda.com/products/individual) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html).
+
+2. **Clone the Repository**: Clone this repository to your local machine using:
+   ```sh
+   git clone https://github.com/HaifaStatistic/Physics-Guided-Inverse-Regression-for-Crop-Quality-Assessment.git
+   cd Physics-Guided-Inverse-Regression-for-Crop-Quality-Assessment
+   ```
+3. **Create the Conda Environment**: Use the environment.yml file to create the Conda environment. Run the following commands:
+    ```sh
+    conda env create -f environment.yml
+    ```
+4. **Activate the Environment**: Activate the newly created environment:
+    ```sh
+    conda activate crop_quality_assessment
+    ```
+    This will install all necessary dependencies and activate the environment, allowing you to run the project code smoothly
+
+
 ## Contact
 Dr. David Shulman dshulman@campus.haifa.ac.il
 
