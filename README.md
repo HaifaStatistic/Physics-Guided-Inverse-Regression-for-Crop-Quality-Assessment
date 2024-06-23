@@ -77,9 +77,10 @@ To set up the environment using Anaconda/Conda, follow these steps:
     ```
     This will install all necessary dependencies and activate the environment, allowing you to run the project code smoothly
 
-
+## Authors
+David Shulman, Assaf Israeli, Yael Botnaro, Ori Margalit, Oved Tamir, Shaul Naschitz, Dan Gamrasni, Ofer M. Shir and Itai Dattner
 ## Contact
-Dr. David Shulman dshulman@campus.haifa.ac.il
+Dr. David Shulman: dshulman@campus.haifa.ac.il
 
 ## Acknowledgments
 
