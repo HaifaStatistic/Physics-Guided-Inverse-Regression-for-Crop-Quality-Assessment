@@ -17,38 +17,10 @@ from torch.nn import MSELoss,CrossEntropyLoss,BCELoss,BCEWithLogitsLoss,Sequenti
 import csv
 import numpy as np
 import os
-#torch.backends.cudnn.deterministic = True
-#torch.backends.cudnn.benchmark = False
-boto3.client('s3', region_name='us-west-2')
-boto3.client('ec2', region_name='us-west-2')
-'''
-with open('number_seed_new_4.txt') as f:
-    number_str = f.read().strip()
-    machine_seed=int(number_str)#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-'''
-machine_seed=120
 
+machine_seed=120
 csv_file_path = '/home/ec2-user/PINN_Cucumber_NEW2.csv'
-def upload_file_to_s3(file_name, bucket, final_tourn=False):
-    object_name = 'Simulation/1/PINN__'+str(machine_seed)+'_.csv'#'+str(count_turns)+'
-    if final_tourn:
-        object_name = 'Simulation/1/finish/PINN__'+str(machine_seed)+'_.csv'
-    s3_client = boto3.client('s3')
-    try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
-    except Exception as e:
-        print(f"Error uploading file: {e}")
-        return False
-    return True
-def scheduled_upload(csv_file_path,final_tourn=False):
-    print("Uploading file...")
-    file_name = csv_file_path # Replace with the path to your file
-    bucket = 'simulationdavidshulman'  # Your S3 bucket
-    success = upload_file_to_s3(file_name, bucket,approach,final_tourn)
-    if success:
-        print(f"File {file_name} uploaded successfully.")
-    else:
-        print("File upload failed.")
+
 def change_shape(sigmoid_weights,outputs1):
     if len(sigmoid_weights.shape) == 1:
         sigmoid_weights = sigmoid_weights.unsqueeze(1)
@@ -58,9 +30,6 @@ def change_shape(sigmoid_weights,outputs1):
         sigmoid_weights = sigmoid_weights.expand(-1, outputs1.shape[1])
     return sigmoid_weights
 def regr_metrics(all_labels_np, all_outputs_np):
-    #all_labels_np.extend(labels.detach().cpu().numpy())
-    #all_outputs_np.extend(outputs.detach().cpu().numpy())
-    #mse=mean_squared_error(all_labels_np, all_outputs_np)
     rmse = sqrt(mean_squared_error(all_labels_np, all_outputs_np))
     mae = mean_absolute_error(all_labels_np, all_outputs_np)
     r2 = r2_score(all_labels_np, all_outputs_np)
@@ -72,11 +41,8 @@ def regr_metrics(all_labels_np, all_outputs_np):
 
 # Define the augmentation
 transform = Compose([
-    #Resize((110,350)),  # Resize all images to the same size
     RandomVerticalFlip(p=0.5),
     RandomHorizontalFlip(p=0.5)#,
-    #ToTensor()#,  # Convert images to PyTorch tensors
-    #Normalize(mean=mean, std=std)
 ])
 
 class CustomDataset(Dataset):
@@ -102,7 +68,7 @@ class CustomDataset(Dataset):
 
 num_states=300
 batch_size=10
-all_b_circ=['b']#'a','b','c','d'
+all_b_circ=['b']
 all_split_sizes=[  30, 45,70]
  
 #try:
@@ -127,15 +93,9 @@ for b_circ in all_b_circ:
                 all_check=False
             else:
                 add_rand+=1
-                #print("Stratification not possible due to class with fewer than 2 samples.")
-              
+          
         train_size=30
-        #for train_size in all_split_sizes:
-        '''
-        # Display the count for each unique value
-        for value, count in class_distribution.items():
-            print(f"Value {value} appears in train_dataset {count} times")
-        '''
+
 
         # Create the custom dataset
         dataset = CustomDataset(images, normalized_labels, int_labels, transform)
@@ -156,10 +116,6 @@ for b_circ in all_b_circ:
         sigma=10
         num_epochsT=18
 
-        #print('model_T: ',model_T)
-        #print('num_epochsT: ',num_epochsT)
-        #print('sigma: ', sigma)
-        #print('sm',sm)
         MT='a'
 
         model_transformer=ImageTransformer11(MT,sigma).to(device)
@@ -172,24 +128,16 @@ for b_circ in all_b_circ:
         frz=False
         mdl1='e1'
         mdl2='e2'
-        #mdl3='c'
-        #mdl4='b6'
         model1=DualResNet3(mdl1,frz).to(device)
         model2=DualResNet3(mdl2,frz).to(device)
-        #model3=DualResNet3(mdl3,frz).to(device)
-        #model4=DualResNet3(mdl4,frz).to(device)
 
 
         # Define the criterion
         criterion = MSELoss()
         learning_rate =0.0001
-        #print("learning_rate ",learning_rate)
-        # Define the optimizer
+
         optimizer1 = Adam(model1.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=True)
         optimizer2 = Adam(model2.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=True)
-        #optimizer3 = Adam(model3.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=True)
-        #optimizer4 = Adam(model4.parameters(), lr=learning_rate, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=True)
-
 
         # Placeholder to save the loss for each epoch
         train_losses = []
@@ -233,96 +181,32 @@ for b_circ in all_b_circ:
 
                 outputs = model_transformer(images).detach()
 
-                #print("images.shape, labels.shape",images.shape, labels.shape)
                 # Forward pass
                 outputs1= model1(images,outputs,mdl1)
                 outputs2,weight1= model2(images,outputs,mdl2)
-                #print("weight1",weight1)
-                #outputs3= model3(images,outputs,mdl3)
-                #outputs4= model4(images,outputs,mdl4)
-                # Apply sigmoid to the weights
-                # Calculate the weighting factor b
-                sigmoid_weights = (1 / (1 + weight1))#.unsqueeze(1)
 
-                # Compute the weighted average of the predictions
-                
-
-                sigmoid_weights1 = torch.sigmoid(weight1)
-                #print("labels.shape,outputs1.shape, outputs2.shape,weight1.shape,sigmoid_weights.shape",labels.shape,outputs1.shape, outputs2.shape,weight1.shape,sigmoid_weights.shape)
-
-                sigmoid_weights=change_shape(sigmoid_weights,outputs1)
-                sigmoid_weights1=change_shape(sigmoid_weights1,outputs1)
-                # Compute the weighted sum of the predictions
-                
-                #(1 / (1 + weight1))
-                #weighted_average = pred1 * (1 - b) + pred2 * b
-                weighted_sum = outputs1 * (1 - sigmoid_weights) + outputs2 * sigmoid_weights
-
-                #sigmoid:
-                #weighted_average = pred1 * b + pred2 * (1 - b)
-                weighted_sum1 = outputs1* sigmoid_weights1  + outputs2 * (1 - sigmoid_weights1)
-                #outputs = (outputs1 + outputs2) / 2
                 outputs1 = outputs1.view(outputs1.shape[0])  # flatten the outputs RESNET
                 outputs2 = outputs2.view(outputs2.shape[0])  # flatten the outputs RESNET
-                #outputs3 = outputs3.view(outputs3.shape[0])  # flatten the outputs RESNET
-                #outputs4 = outputs4.view(outputs4.shape[0])  # flatten the outputs RESNET
-                
-                '''
-                print("labels.shape,outputs1, outputs2,sigmoid_weights.shape",labels.shape,outputs1.shape, outputs2.shape,sigmoid_weights.shape)
-                print("weighted_sum",weighted_sum)
-                print("sigmoid_weights",sigmoid_weights)
 
-                print("outputs1",outputs1)
-                print("outputs2",outputs2)
-                '''
                 loss1 = criterion(outputs1, labels)
                 loss2 = criterion(outputs2, labels)
-                #loss3 = criterion(outputs3, labels)
-                #loss4 = criterion(outputs4, labels)
-                
-                total_loss = loss1 + loss2# +  loss4
 
-                # Backward and optimize
+                total_loss = loss1 + loss2
+
+
                 optimizer1.zero_grad()
                 optimizer2.zero_grad()
-                #optimizer3.zero_grad()
-                #optimizer4.zero_grad()
 
                 total_loss.backward()
-                '''
-                loss1.backward()
-                loss2.backward()
-                loss3.backward()
-                '''
-                #torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
                 optimizer1.step()
                 optimizer2.step()
-                #optimizer3.step()
-                #optimizer4.step()
-                '''
-                train_losses += loss1.item()
-                train_losses2 += loss2.item()
-                train_losses3 += loss3.item()
-                num_batches += 1      
-                '''  
-            # Calculate the average loss for this epoch and add to list
-            '''
-            avg_loss = train_losses / num_batches
-            avg_loss2 = train_losses2 / num_batches
-            avg_loss3 = train_losses3 / num_batches
-            
-            print("avg_loss1 Train",avg_loss)
-            print("avg_loss2 Train",avg_loss2)
-            print("avg_loss3 Train",avg_loss3)
-            
-            epoch_losses.append(avg_loss)   
-            '''    
+    
             print("epoch",epoch)
             if epoch>25:
                 model1.eval()
                 model2.eval()
-                #model3.eval()
-                #model4.eval()
+
                 with torch.no_grad():
                     test_losses = []
                     all_outputs1 = []
@@ -342,97 +226,26 @@ for b_circ in all_b_circ:
 
                         outputs1= model1(images,outputs,mdl1)
                         outputs2,weight1= model2(images,outputs,mdl2)###############
-                        #outputs3= model3(images,outputs,mdl3)####################
-                        #outputs4= model4(images,outputs,mdl4)####################
-                        # Apply sigmoid to the weights
-                        ###################################
-                        sigmoid_weights = (1 / (1 + weight1))#.unsqueeze(1)
 
-                        # Compute the weighted average of the predictions
-                        
-
-                        sigmoid_weights1 = torch.sigmoid(weight1)
-                        #print("labels.shape,outputs1.shape, outputs2.shape,weight1.shape,sigmoid_weights.shape",labels.shape,outputs1.shape, outputs2.shape,weight1.shape,sigmoid_weights.shape)
-
-                        sigmoid_weights=change_shape(sigmoid_weights,outputs1)
-                        sigmoid_weights1=change_shape(sigmoid_weights1,outputs1)
-                        # Compute the weighted sum of the predictions
-                        
-                        #(1 / (1 + weight1))
-                        #weighted_average = pred1 * (1 - b) + pred2 * b
-                        weighted_sum = outputs1 * (1 - sigmoid_weights) + outputs2 * sigmoid_weights
-
-                        #sigmoid:
-                        #weighted_average = pred1 * b + pred2 * (1 - b)
-                        weighted_sum1 = outputs1* sigmoid_weights1  + outputs2 * (1 - sigmoid_weights1)
-                        ##################################
-                        #outputs = (outputs1 + outputs2) / 2
                         outputs1 = outputs1.view(outputs1.shape[0])  # flatten the outputs RESNET
                         outputs2 = outputs2.view(outputs2.shape[0])  # flatten the outputs RESNET
-                        weighted_sum= weighted_sum.view(weighted_sum.shape[0])
-                        weighted_sum1= weighted_sum1.view(weighted_sum1.shape[0])
-                        #outputs3 = outputs3.view(outputs3.shape[0])  # flatten the outputs RESNET
-                        #outputs4 = outputs4.view(outputs4.shape[0])  # flatten the outputs RESNET
 
                         all_labels.extend(labels.detach().cpu().numpy())
                         all_outputs1.extend(outputs1.detach().cpu().numpy())
                         all_outputs2.extend(outputs2.detach().cpu().numpy())
-                        #all_outputs3.extend(outputs3.detach().cpu().numpy())
-                        #all_outputs4.extend(outputs4.detach().cpu().numpy())
-                        all_weighted_sum.extend(weighted_sum.detach().cpu().numpy())
-                        all_weighted_sum1.extend(weighted_sum1.detach().cpu().numpy())
 
 
-                        #all_outputs.extend(outputs.detach().cpu().numpy())
-
-                    #if epoch>25:# or 1==1:
-                    # Append metrics for each model (you'll need to modify this based on how you get outputs for each model)
                     all_labels_np =(np.array(all_labels)) 
                     metrics1=regr_metrics(all_labels_np, all_outputs1)
-                    metrics2=regr_metrics(all_labels_np, all_outputs2)####################
-                    metrics3=regr_metrics(all_labels_np, all_weighted_sum1)
-                    #metrics4=regr_metrics(all_labels_np, all_outputs3)##################
-                    metrics5=regr_metrics(all_labels_np, all_weighted_sum)
-                    #metrics6=regr_metrics(all_labels_np, all_outputs4)
-                    ''''''
-                    print("Epoch",epoch)
-                    print("rmse,mae,std_errors ,r2 ")
-                    print("metrics1 e1",metrics1)
-                    print("metrics2 e2",metrics2)
-                    print("metrics3 sigmoid_sepate",metrics3)
-                    #print("metrics4 c",metrics4)
-                    print("metrics5 b5_separate",metrics5)
-                    #print("metrics6 b6",metrics6)
-                    
+                    metrics2=regr_metrics(all_labels_np, all_outputs2)
+
                     metrics_model1.append(metrics1)
                     metrics_model2.append(metrics2)
-                    metrics_model3.append(metrics3)
-                    #metrics_model4.append(metrics4)
-                    metrics_model5.append(metrics5)
-                    #metrics_model6.append(metrics6)
-                    '''
-                    all_outputs_np = (np.array(all_outputs))                    #np.expm1
-                    all_labels_np =(np.array(all_labels))                       #np.expm1
-                    mse,rmse,mae,r2,std_errors=regr_metrics(all_labels_np, all_outputs_np)
-                    average_RMSE_loss.append(rmse)
-                    average_R_Sq.append(r2)
-                    all_mae_test.append(mae)
-                    std_errors_test.append( std_errors)
-                    
-                    print(metrics_model1)
-                    print(metrics_model2)
-                    print(metrics_model3)
-                    '''
-            #print(f'Test: Epoch {epoch+1}, MSE: {mse:.4f},RMSE: {rmse:.4f}, MAE: {mae:.4f}, R²: {r2:.4f}')     
-            # Calculate average metrics for each model
+
+
         avg_metrics_model1 = np.mean(metrics_model1, axis=0)
         avg_metrics_model2 = np.mean(metrics_model2, axis=0)
-        avg_metrics_model3 = np.mean(metrics_model3, axis=0)
-        #avg_metrics_model4 = np.mean(metrics_model4, axis=0)
-        avg_metrics_model5 = np.mean(metrics_model5, axis=0)
-        #avg_metrics_model6 = np.mean(metrics_model6, axis=0)
-        #print("avg_metrics_model1",avg_metrics_model1)
-        #print("avg_metrics_model4",avg_metrics_model4)
+
         ################### #################
         # Save the averages to a CSV file
         headers = [  'Model', 'Average RMSE', 'Average MAE', 'Average Std Errors', 'Average R2','Train Size', 'Test Size', 'batch_size',"Seed",'dataset',"num_epochsT",'b_circ']
@@ -444,43 +257,5 @@ for b_circ in all_b_circ:
             writer = csv.writer(csvfile)
             if not file_exists:
                 writer.writerow(headers)  # Write header
-            writer.writerow([ 'e1',avg_metrics_model1[0], avg_metrics_model1[1], avg_metrics_model1[2], avg_metrics_model1[3], train_size1, test_size1, batch_size,seed_val,approach,num_epochsT,b_circ])
-            writer.writerow([ 'e2', avg_metrics_model2[0], avg_metrics_model2[1], avg_metrics_model2[2], avg_metrics_model2[3], train_size1, test_size1, batch_size, seed_val,approach,num_epochsT,b_circ])
-            writer.writerow([ 'sigmoid_sepate', avg_metrics_model3[0], avg_metrics_model3[1], avg_metrics_model3[2], avg_metrics_model3[3], train_size1, test_size1, batch_size, seed_val,approach,num_epochsT,b_circ])
-            #writer.writerow([ 'c', avg_metrics_model4[0], avg_metrics_model4[1], avg_metrics_model4[2], avg_metrics_model4[3], train_size1, test_size1, batch_size, seed_val,approach,num_epochsT,b_circ])
-            writer.writerow([ 'b5_separate', avg_metrics_model5[0], avg_metrics_model5[1], avg_metrics_model5[2], avg_metrics_model5[3], train_size1, test_size1, batch_size, seed_val,approach,num_epochsT,b_circ])
-            #writer.writerow([ 'b6', avg_metrics_model6[0], avg_metrics_model6[1], avg_metrics_model6[2], avg_metrics_model6[3], train_size1, test_size1, batch_size, seed_val,approach,num_epochsT,b_circ])
-        scheduled_upload(csv_file_path,final_tourn=False)       
-
-
-
-'''                
-except:
-    print("Something else went wrong")            
-'''
-'''
-final_tourn=True
-scheduled_upload(csv_file_path,approach,final_tourn=True)
-
-except IndexError:
-    print(f"No label found for file: {image_path}")
-
-'''
-'''
-def terminate_instance():
-    # Get the current instance ID
-    instance_id = subprocess.getoutput("curl -s http://169.254.169.254/latest/meta-data/instance-id")
-    
-    # Initialize boto3 EC2 client
-    ec2_client = boto3.client('ec2', region_name='us-west-2')
-
-    # Terminate the instance
-    try:
-        ec2_client.terminate_instances(InstanceIds=[instance_id])
-        print(f"Instance {instance_id} is scheduled for termination.")
-    except Exception as e:
-        print(f"Error terminating instance: {e}")
-
-# Call the function at the end of your script
-terminate_instance()
-'''
+            writer.writerow([ 'ResNet',avg_metrics_model1[0], avg_metrics_model1[1], avg_metrics_model1[2], avg_metrics_model1[3], train_size1, test_size1, batch_size,seed_val,approach,num_epochsT,b_circ])
+            writer.writerow([ 'PGNN', avg_metrics_model2[0], avg_metrics_model2[1], avg_metrics_model2[2], avg_metrics_model2[3], train_size1, test_size1, batch_size, seed_val,approach,num_epochsT,b_circ])
