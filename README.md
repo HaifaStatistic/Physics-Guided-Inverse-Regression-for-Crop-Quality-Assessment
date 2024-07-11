@@ -5,12 +5,11 @@ This repository contains the implementation and data for the paper "Physics-Guid
 
 ## Repository Structure
 - **data/**: Contains datasets used in the study, including both raw and processed data.
-- **models/**: Includes trained models and scripts for training new models.
-- **plots/**: Directory for storing plots and visualizations generated during the analysis.
-- **scripts/**: Contains various utility scripts for data preprocessing, model training, and evaluation.
+- **code/**: Includes trained models and scripts for training new models.
+- **utils/**: Contains various utility scripts for data preprocessing, model training, and evaluation.
 - **README.md**: This file.
 - **environment.yml**: List of dependencies required to run the code.
-- **run_model_selection.py**: Script to run the model selection process.
+
 
 ## Abstract
 We present an innovative approach leveraging Physics-Guided Neural Networks (PGNNs) for enhancing agricultural quality assessments. Central to our methodology is the application of physics-guided inverse regression, a technique that significantly improves the model's ability to precisely predict quality metrics of crops. This approach directly addresses the challenges of scalability, speed, and practicality that traditional assessment methods face. By integrating physical principles, notably Fick’s second law of diffusion, into neural network architectures, our developed PGNN model achieves a notable advancement in enhancing both the interpretability and accuracy of assessments. Empirical validation conducted on cucumbers and mushrooms demonstrates the superior capability of our model in outperforming conventional computer vision techniques in postharvest quality evaluation. This underscores our contribution as a scalable and efficient solution to the pressing demands of global food supply challenges.
@@ -87,5 +86,5 @@ Dr. David Shulman: dshulman@campus.haifa.ac.il
 The author(s) would like to express their gratitude for the financial support received for the research, authorship, and publication of this article:
 
 - This project is supported by Israel Science Foundation grant (1755/22)
-- This project is supported by Veterinary Services and Animal Health, Ministry of Agriculture and Rural Development (21-06-0012)
+- This project is supported by Veterinary Services and Animal Health, Israel Ministry of Agriculture and Rural Development (21-06-0012)
 
