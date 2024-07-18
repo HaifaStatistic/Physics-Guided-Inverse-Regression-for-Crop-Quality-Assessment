@@ -98,6 +98,7 @@ If you find our work useful, can cite our paper using:
 
 The author(s) would like to express their gratitude for the financial support received for the research, authorship, and publication of this article:
 
+- University of Haifa
 - This project is supported by Israel Science Foundation grant (1755/22)
 - This project is supported by Veterinary Services and Animal Health, Israel Ministry of Agriculture and Rural Development (21-06-0012)
 
