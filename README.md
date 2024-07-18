@@ -78,9 +78,22 @@ To set up the environment using Anaconda/Conda, follow these steps:
 
 ## Authors
 David Shulman, Assaf Israeli, Yael Botnaro, Ori Margalit, Oved Tamir, Shaul Naschitz, Dan Gamrasni, Ofer M. Shir and Itai Dattner
+
 ## Contact
 Dr. David Shulman: dshulman@campus.haifa.ac.il
 
+## Citation
+If you find our work useful, can cite our paper using:
+```
+@article{Shulman2024,
+  author    = {Shulman, D. and Israeli, A. and Botnaro, Y. and others},
+  title     = {Physics-Guided Inverse Regression for Crop Quality Assessment},
+  journal   = {Journal of Agricultural, Biological, and Environmental Statistics (JABES)},
+  year      = {2024},
+  doi       = {10.1007/s13253-024-00643-9},
+  url       = {https://doi.org/10.1007/s13253-024-00643-9}
+}
+```
 ## Acknowledgments
 
 The author(s) would like to express their gratitude for the financial support received for the research, authorship, and publication of this article:
