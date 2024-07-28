@@ -109,49 +109,7 @@ transform = Compose([
     ToTensor(),  # Convert images to PyTorch tensors
     Normalize(mean=mean, std=std)
 ])
-"""
-class CucumberDataset(Dataset):
-    def __init__(self, image_dir, labels_df, transform=None):
-        self.transform = transform
-        self.labels_df = labels_df
 
-        self.labels_df['Image_Name'] = self.labels_df['Image_Name'].astype(str)
-
-        self.image_paths = []
-        #print('image_dir',image_dir)
-        for image_file in image_dir:
-            folder_name = os.path.basename(image_file)
-            #self.image_paths.extend([os.path.join(image_file, f) for f in os.listdir(image_file)])
-            self.image_paths.extend([os.path.join(image_file, f) for f in os.listdir(image_file) if f.endswith(('.jpg', '.png', '.jpeg'))])
-
-
-    def __len__(self):
-        return len(self.image_paths)
- #label = torch.tensor(self.labels_df.loc[(self.labels_df['A'] == group) & (self.labels_df['B'] == cucumber_number), 'fitness'].values[0]).float()
-    def __getitem__(self, idx):
-        image_path = self.image_paths[idx]
-        #print("image_path,f_name",image_path )
-        # Load image
-        image = Image.open(image_path).convert("RGB")
-        if self.transform:
-            image = self.transform(image)
-
-        # Extract group and cucumber_number from the image file name
-        filename = os.path.splitext(os.path.basename(image_path))[0]
-        #print("image_path,f_name",image_path,f_name )
-        try:
-            label_value = self.labels_df.loc[(self.labels_df['Image_Name'] == filename) , 'Quality_Label'].values[0]
-            if 0 <= label_value <= 25:
-                bin_label=int(label_value)
-                label = torch.tensor(label_value).float()
-            else:
-                return None
-
-        except IndexError:
-            return None
-
-        return image, label,filename,bin_label
-"""
 class CucumberDataset(Dataset):
     def __init__(self, image_files, labels_df,transform=None):
         self.transform = transform
